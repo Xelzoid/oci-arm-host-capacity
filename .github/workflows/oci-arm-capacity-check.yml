@@ -1,0 +1,45 @@
+# .github/workflows/oci-arm-capacity-check.yml
+name: OCI ARM Capacity Checker
+
+on:
+  # Manual trigger for ad-hoc runs
+  workflow_dispatch:
+
+  # Scheduled: every 30 minutes
+  schedule:
+    - cron: '*/30 * * * *'
+
+jobs:
+  check-capacity:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress
+
+      - name: Introduce random jitter
+        # Sleep for up to 0–59 seconds to avoid hitting API at same exact time each run
+        run: sleep $((RANDOM % 60))
+
+      - name: Run capacity check
+        run: php index.php
+        env:
+          OCI_REGION:              ${{ secrets.OCI_REGION }}
+          OCI_USER_ID:             ${{ secrets.OCI_USER_ID }}
+          OCI_TENANCY_ID:          ${{ secrets.OCI_TENANCY_ID }}
+          OCI_KEY_FINGERPRINT:     ${{ secrets.OCI_KEY_FINGERPRINT }}
+          OCI_PRIVATE_KEY_FILENAME:${{ secrets.OCI_PRIVATE_KEY_FILENAME }}
+          OCI_SHAPE:               ${{ secrets.OCI_SHAPE }}
+          OCI_OCPUS:               ${{ secrets.OCI_OCPUS }}
+          OCI_MEMORY_IN_GBS:       ${{ secrets.OCI_MEMORY_IN_GBS }}
+          OCI_MAX_INSTANCES:       ${{ secrets.OCI_MAX_INSTANCES }}
+          OCI_IMAGE_ID:            ${{ secrets.OCI_IMAGE_ID }}
+          OCI_SUBNET_ID:           ${{ secrets.OCI_SUBNET_ID }}
+          OCI_SSH_PUBLIC_KEY:      ${{ secrets.OCI_SSH_PUBLIC_KEY }}

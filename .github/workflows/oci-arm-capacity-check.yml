@@ -1,11 +1,8 @@
-# .github/workflows/oci-arm-capacity-check.yml
 name: OCI ARM Capacity Checker
 
 on:
-  # Manual trigger for ad-hoc runs
   workflow_dispatch:
 
-  # Scheduled: every 30 minutes
   schedule:
     - cron: '*/30 * * * *'
 
